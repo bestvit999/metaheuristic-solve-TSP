@@ -74,8 +74,17 @@ void showTrail(trail best);
 #define pop_size 10 // population size = 10
 #define limited_iter 1250 // end condiction
  
-int main(){
-    main_ox();
+int main(int argc, char *argv[]){
+    if (std::stoi(argv[1]) == 1){
+        std::cout << "pmx is using" << std::endl;
+        main_pmx();
+    }else if (std::stoi(argv[1]) == 2){
+        std::cout << "cx is using" << std::endl;
+        main_cx();
+    }else if (std::stoi(argv[1]) == 3){
+        std::cout << "ox is using" << std::endl;
+        main_ox();
+    }
 }
 
 void main_pmx()
@@ -100,8 +109,11 @@ void main_pmx()
         for (int i = 0;i < pop_p.size() / 2;i++){
 
             // pick the best kth individuals in parent set to generate pop_c
-            trail a = pick_better_chromosome(pop_p);
-            trail b = pick_better_chromosome(pop_p);
+            // trail a = pick_better_chromosome(pop_p);
+            // trail b = pick_better_chromosome(pop_p);
+
+            trail a = pop_p[rand() % pop_p.size()];
+            trail b = pop_p[rand() % pop_p.size()];
 
             pmx(a,b);
 
@@ -146,8 +158,11 @@ void main_cx(){
         for (int i = 0;i < pop_p.size() / 2;i++){
 
             // pick the best kth individuals in parent set to generate pop_c
-            trail a = pick_better_chromosome(pop_p);
-            trail b = pick_better_chromosome(pop_p);
+            // trail a = pick_better_chromosome(pop_p);
+            // trail b = pick_better_chromosome(pop_p);
+
+            trail a = pop_p[rand() % pop_p.size()];
+            trail b = pop_p[rand() % pop_p.size()];
 
             cx(a,b);
 
@@ -191,8 +206,11 @@ void main_ox(){
         for (int i = 0;i < pop_p.size() / 2;i++){
 
             // pick the best kth individuals in parent set to generate pop_c
-            trail a = pick_better_chromosome(pop_p);
-            trail b = pick_better_chromosome(pop_p);
+            // trail a = pick_better_chromosome(pop_p);
+            // trail b = pick_better_chromosome(pop_p);
+
+            trail a = pop_p[rand() % pop_p.size()];
+            trail b = pop_p[rand() % pop_p.size()];
 
             ox(a,b);
 
@@ -205,7 +223,7 @@ void main_ox(){
         pop_c.clear();  
 
         // mutate all individual in population (kind of local-search)
-        // mutate(pop_p);
+        mutate(pop_p);
         
         showTrail(best);
         std::cout << evaluate_trail_distance(best) << std::endl;
@@ -501,9 +519,16 @@ node LS_legalize_order(trail illegal_chr, trail candidate_chr){
 
 void mutate(trails &chromosomes){
     for (int i = 0;i < chromosomes.size();i++){
-        // mutation rate = 0.1;
+        // mutation rate = 0.2;
         if (rand() % 10 < 1){
-            chromosomes[i] = TwoOptSwap(chromosomes[i],rand() % chromosomes[i].size(),rand() % chromosomes[i].size());
+            int const_i = rand() % chromosomes[i].size();
+            int const_k = rand() % chromosomes[i].size();
+
+            if (const_i == const_k){
+                chromosomes[i] = TwoOptSwap(chromosomes[i],const_i,const_k+1);
+            }else{
+                chromosomes[i] = TwoOptSwap(chromosomes[i],const_i,const_k);
+            }
         }
         TwoOpt(chromosomes[i]);
     }
@@ -513,8 +538,8 @@ void TwoOpt(trail &chromosome){
     int improve = 0;
     while (improve < 20){
 
-        for (int start = 0;start < chromosome.size();start++){
-            for (int end = start + 1; end < chromosome.size();end++){
+        for (int start = 1;start < chromosome.size()-1;start++){
+            for (int end = start + 1; end < chromosome.size()-1;end++){
                 trail tmp_chr = TwoOptSwap(chromosome,start,end);
 
                 if (evaluate_trail_distance(tmp_chr) < evaluate_trail_distance(chromosome)){
@@ -560,7 +585,7 @@ trail pick_better_chromosome(trails pop_p){
 
     std::vector<trail> candidate;
     for (int i = 0;i < pop_p.size();i++){
-        if (evaluate_trail_distance(pop_p[i]) < avg){
+        if (evaluate_trail_distance(pop_p[i]) <= avg){
             candidate.push_back(pop_p[i]);
         }
     }
